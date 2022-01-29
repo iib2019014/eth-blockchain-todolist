@@ -1,6 +1,14 @@
+// const Web3 = require('web3')
+
 App = {
+    loading: false,
+    contracts: {},
+    
     load: async () => {
-        await App.loadWeb3()
+        await App.loadWeb3();
+        await App.loadAccount();
+        await App.loadContract();
+        await App.render();
     },
 
     // loadWeb3 -> understand it as connectToBlockChain
@@ -35,6 +43,95 @@ App = {
         // Non-dapp browsers...
         else {
             console.log('Non-Ethereum browser detected. You should consider trying MetaMask!')
+        }
+    },
+
+    loadAccount: async () => {
+        App.account = web3.eth.accounts[0];
+        console.log("account is : " + App.account)
+    },
+
+    loadContract: async () => {
+        // create a js version of the smart contract,
+        const todoList = await $.getJSON('TodoList.json');
+        console.log("todoList is : ");
+        console.log(todoList);
+        App.contracts.TodoList = TruffleContract(todoList);
+        App.contracts.TodoList.setProvider(App.web3Provider);
+
+        // hydrate the smart contract with values from the blockchain
+        App.todoList = await App.contracts.TodoList.deployed();
+    },
+
+    render : async () => {
+        // prevent double rendering,
+        if(App.loading) {
+            return;
+        }
+
+        // update app loading status,
+        App.setLoading(true);
+
+
+        // render account,
+        $('#account').html(App.account);
+
+        // render tasks,
+        await App.renderTasks();
+
+        // update app loading status,
+        App.setLoading(false);
+    },
+
+    renderTasks : async () => {
+        // load the tasks form the blockchain,
+            // we can't fetch all the tasks mapping all at a time,
+            // so we need taskCount and then render one at a time,
+        const taskCount = await App.todoList.taskCount();
+        console.log("taskCount is : " + taskCount)
+        const $taskTemplate = $('.taskTemplate');
+
+        // render each task with the task template,
+        for(let id = 1; id <= taskCount; id++) {
+            const task = await App.todoList.tasks(id);
+            console.log(task[0])
+            const taskID = task[0].toNumber();
+            const taskDescription = task[1];
+            const taskCompleted = task[2];
+
+            const $newTaskTemplate = $taskTemplate.clone();
+            $newTaskTemplate.find('.content').html(taskDescription);
+            $newTaskTemplate.find('input')
+                            .prop('name', taskID)
+                            .prop('checked', taskCompleted)
+                            // .on('click', App.toggles.taskCompleted)
+
+            if(taskCompleted) {
+                $('#completedTaskList').append($newTaskTemplate);
+            }
+            else {
+                $('#taskList').append($newTaskTemplate);
+            }
+            
+            // show task
+            $newTaskTemplate.show();
+        }
+
+
+    },
+
+    setLoading: (boolean) => {
+        App.loading = boolean;
+        const loader = $('#loader');
+        const content = $('#content');
+
+        if(boolean) {
+            loader.show();
+            content.hide();
+        }
+        else {
+            loader.hide();
+            content.show();
         }
     }
 }
