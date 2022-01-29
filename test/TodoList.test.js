@@ -20,4 +20,13 @@ contract('TodoList', (accounts) => {
         const task = await this.todoList.tasks(taskCount);
         assert.equal(task.id.toNumber(), taskCount.toNumber());
     })
+
+    it('creates tasks', async () => {
+        const result = await this.todoList.createTask('Complete Blockchain app today.');
+        const taskCount = await this.todoList.taskCount();
+        assert.equal(taskCount.toNumber(), 2);
+        const event_args = result.logs[0].args;
+        // console.log(event_args);
+        assert.equal(event_args.description, 'Complete blockchain app today.');
+    })
 })

@@ -94,7 +94,7 @@ App = {
         // render each task with the task template,
         for(let id = 1; id <= taskCount; id++) {
             const task = await App.todoList.tasks(id);
-            console.log(task[0])
+            // console.log(task[0])
             const taskID = task[0].toNumber();
             const taskDescription = task[1];
             const taskCompleted = task[2];
@@ -118,6 +118,17 @@ App = {
         }
 
 
+    },
+
+
+    createTask : async () => {
+        App.setLoading(true);
+        const content = $('#newTask').val();
+        console.log("content : " + content);
+        const event = await App.todoList.createTask(content);
+        console.log("event is : " + event);
+        console.log("new task id : " + event.logs[0].args.id.toNumber());
+        window.location.reload();
     },
 
     setLoading: (boolean) => {
