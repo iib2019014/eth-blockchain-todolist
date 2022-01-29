@@ -104,7 +104,7 @@ App = {
             $newTaskTemplate.find('input')
                             .prop('name', taskID)
                             .prop('checked', taskCompleted)
-                            // .on('click', App.toggles.taskCompleted)
+                            .on('click', App.toggleCompleted)
 
             if(taskCompleted) {
                 $('#completedTaskList').append($newTaskTemplate);
@@ -128,6 +128,15 @@ App = {
         const event = await App.todoList.createTask(content);
         console.log("event is : " + event);
         console.log("new task id : " + event.logs[0].args.id.toNumber());
+        window.location.reload();
+    },
+
+    toggleCompleted : async (e) => {
+        App.setLoading(true);
+
+        const taskID = e.target.name;
+        console.log("task id : " + taskID);
+        const event = await App.todoList.toggleCompleted(taskID);
         window.location.reload();
     },
 

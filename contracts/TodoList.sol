@@ -18,6 +18,11 @@ contract TodoList {
         bool completed
     );
 
+    event TaskCompleted(
+        uint id,
+        bool completed
+    );
+
     constructor() public {
         createTask("Submit the lab session and lab assignment.");
     }
@@ -29,5 +34,12 @@ contract TodoList {
         emit TaskCreated(taskCount, content, false);
     }
 
+    function toggleCompleted(uint id) public {
+        Task memory task = tasks[id];
+        task.completed = !task.completed;
+        tasks[task.id] = task;
+
+        emit TaskCompleted(id, task.completed);
+    }
 
 }

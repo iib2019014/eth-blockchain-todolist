@@ -27,6 +27,13 @@ contract('TodoList', (accounts) => {
         assert.equal(taskCount.toNumber(), 2);
         const event_args = result.logs[0].args;
         // console.log(event_args);
-        assert.equal(event_args.description, 'Complete blockchain app today.');
+        assert.equal(event_args.description, 'Complete Blockchain app today.');
+    })
+
+    it('toggles task status', async () => {
+        const task_bef = await this.todoList.tasks(1);
+        const event = await this.todoList.toggleCompleted(1);
+        const task_aft = await this.todoList.tasks(1);
+        assert.equal(task_bef[2], !task_aft[2]);
     })
 })
